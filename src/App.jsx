@@ -1,77 +1,83 @@
 import { useEffect, useState } from "react";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { ethers } from "ethers";
-import abi from "./abi/HeroMonsterBattle.json";
 
 const CONTRACT_ADDRESS = "0x7eb0e397fb22958d80d44725f9dc1d2ffd1aac26";
+const ABI = [
+  {
+    "inputs": [],
+    "name": "attack",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "player", "type": "address" }
+    ],
+    "name": "getStatus",
+    "outputs": [
+      { "internalType": "uint256", "name": "hp", "type": "uint256" },
+      { "internalType": "uint256", "name": "kills", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
-export default function App() {
-  const { ready, authenticated, login, logout } = usePrivy();
-  const { wallets } = useWallets();
-  const wallet = wallets[0];
-  const [hp, setHP] = useState(null);
-  const [kills, setKills] = useState(null);
-  const [loading, setLoading] = useState(false);
+function App() {
+  const [wallet, setWallet] = useState("");
+  const [status, setStatus] = useState({ hp: 0, kills: 0 });
+  const [provider, setProvider] = useState(null);
+  const [contract, setContract] = useState(null);
 
-  const getStatus = async () => {
-    if (!wallet?.address) return;
-    const provider = new ethers.BrowserProvider(wallet);
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
-    const [hp, kills] = await contract.getStatus(wallet.address);
-    setHP(hp.toString());
-    setKills(kills.toString());
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      setWallet(accounts[0]);
+      const _provider = new ethers.BrowserProvider(window.ethereum);
+      setProvider(_provider);
+      const signer = await _provider.getSigner();
+      const _contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      setContract(_contract);
+    } else {
+      alert("Wallet not found. Please install MetaMask or OKX Wallet.");
+    }
   };
 
   const attack = async () => {
-    if (!wallet) return;
-    setLoading(true);
-    try {
-      const provider = new ethers.BrowserProvider(wallet);
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
-      const tx = await contract.attack();
-      await tx.wait();
-      await getStatus();
-    } catch (err) {
-      console.error("Attack failed:", err);
-    } finally {
-      setLoading(false);
-    }
+    if (!contract) return;
+    const tx = await contract.attack();
+    await tx.wait();
+    getStatus(); // refresh status after attack
+  };
+
+  const getStatus = async () => {
+    if (!contract || !wallet) return;
+    const data = await contract.getStatus(wallet);
+    setStatus({ hp: Number(data.hp), kills: Number(data.kills) });
   };
 
   useEffect(() => {
-    if (authenticated) {
+    if (wallet && contract) {
       getStatus();
     }
-  }, [authenticated]);
+  }, [wallet, contract]);
 
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4">⚔️ Hero vs Monster</h1>
-      {!ready ? (
-        <p>Loading Privy...</p>
-      ) : authenticated ? (
-        <div>
-          <p><strong>Wallet:</strong> {wallet?.address}</p>
-          <p><strong>HP:</strong> {hp}</p>
-          <p><strong>Kills:</strong> {kills}</p>
-          <button
-            onClick={attack}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-            disabled={loading}
-          >
-            {loading ? "Attacking..." : "Attack!"}
-          </button>
-          <button onClick={logout} className="mt-4 ml-4 text-sm text-gray-500 underline">Log Out</button>
-        </div>
+    <div style={{ padding: "2rem", fontFamily: "monospace" }}>
+      <h1>⚔️ Hero vs Monster</h1>
+      {wallet ? (
+        <>
+          <p>🦊 Wallet: {wallet}</p>
+          <p>❤️ HP: {status.hp}</p>
+          <p>💀 Kills: {status.kills}</p>
+          <button onClick={attack}>Attack</button>
+        </>
       ) : (
-        <button
-          onClick={login}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Connect Wallet
-        </button>
+        <button onClick={connectWallet}>Connect Wallet</button>
       )}
-    </main>
+    </div>
   );
 }
+
+export default App;

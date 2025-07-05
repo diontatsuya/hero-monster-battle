@@ -1,17 +1,15 @@
 body {
+  background-color: #0d1117;
+  color: #c9d1d9;
+  font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #fafafa;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .container {
   max-width: 600px;
-  margin: 2rem auto;
+  margin: auto;
   padding: 2rem;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
@@ -20,40 +18,48 @@ body {
   margin-bottom: 1rem;
 }
 
-.wallet, .stat {
-  font-size: 1.1rem;
+.wallet {
+  font-size: 0.9rem;
+  color: #58a6ff;
+  word-break: break-all;
+  margin-bottom: 1rem;
+}
+
+.stat {
+  font-size: 1.2rem;
   margin: 0.5rem 0;
 }
 
 .value {
   font-weight: bold;
-}
-
-.connect-button,
-.attack-button {
-  padding: 1rem 2rem;
-  margin-top: 1.5rem;
-  background-color: #333;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.connect-button:hover,
-.attack-button:hover {
-  background-color: #555;
-}
-
-.attack-button:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
+  color: #3fb950;
 }
 
 .attacking {
+  color: #facc15;
+  margin: 1rem 0;
   font-style: italic;
-  color: #d9534f;
-  margin-bottom: 1rem;
+}
+
+.attack-button,
+.connect-button {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  background-color: #238636;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.attack-button:hover,
+.connect-button:hover {
+  background-color: #2ea043;
+}
+
+.attack-button:disabled {
+  background-color: #444c56;
+  cursor: not-allowed;
 }

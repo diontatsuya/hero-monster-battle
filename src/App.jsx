@@ -30,7 +30,7 @@ export default function App() {
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xc4808" }],
+          params: [{ chainId: "0xc4f8" }],
         });
       } catch (switchError) {
         if (switchError.code === 4902) {

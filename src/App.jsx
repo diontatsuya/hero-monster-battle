@@ -15,49 +15,51 @@ export default function App() {
   const [hp, setHp] = useState(null);
   const [kills, setKills] = useState(null);
 
-  // Fungsi untuk connect ke wallet dan ke jaringan Somnia Testnet
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("MetaMask tidak ditemukan!");
       return;
     }
 
-    const web3Provider = new ethers.BrowserProvider(window.ethereum, "any");
-
     try {
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const address = accounts[0];
-      setWallet(address);
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
 
-      // Switch ke jaringan Somnia
+      // Switch ke jaringan Somnia (chainId = 50312 = 0xc4808)
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xc4808" }] // 50312 dalam heksadesimal
+          params: [{ chainId: "0xc4808" }],
         });
       } catch (switchError) {
-        // Jika jaringan belum ditambahkan, tambahkan secara otomatis
         if (switchError.code === 4902) {
           await window.ethereum.request({
             method: "wallet_addEthereumChain",
-            params: [{
-              chainId: "0xc4808",
-              chainName: "Somnia Testnet",
-              nativeCurrency: {
-                name: "Somnia Testnet Token",
-                symbol: "STT",
-                decimals: 18
+            params: [
+              {
+                chainId: "0xc4808",
+                chainName: "Somnia Testnet",
+                nativeCurrency: {
+                  name: "Somnia Testnet Token",
+                  symbol: "STT",
+                  decimals: 18,
+                },
+                rpcUrls: ["https://dream-rpc.somnia.network/"],
+                blockExplorerUrls: [
+                  "https://shannon-explorer.somnia.network/",
+                ],
               },
-              rpcUrls: ["https://dream-rpc.somnia.network/"],
-              blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
-            }]
+            ],
           });
         } else {
           throw switchError;
         }
       }
 
+      const web3Provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await web3Provider.getSigner();
+      const address = await signer.getAddress();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
       setProvider(web3Provider);

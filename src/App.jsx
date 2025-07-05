@@ -32,7 +32,7 @@ export default function App() {
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xc4f8" }], // ✅ Benar: 50312
+          params: [{ chainId: "0xc488" }], // ✅ Benar: 50312
         });
       } catch (switchError) {
         if (switchError.code === 4902) {
@@ -41,7 +41,7 @@ export default function App() {
             method: "wallet_addEthereumChain",
             params: [
               {
-                chainId: "0xc4f8",
+                chainId: "0xc488",
                 chainName: "Somnia Testnet",
                 nativeCurrency: {
                   name: "Somnia Testnet Token",

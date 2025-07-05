@@ -1,3 +1,4 @@
+/* Container utama */
 .container {
   max-width: 600px;
   margin: 2rem auto;
@@ -8,18 +9,39 @@
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
+
+/* Judul utama */
 .title {
   font-size: 2rem;
   margin-bottom: 1rem;
+  color: #333;
 }
+
+/* Alamat wallet dan status */
 .wallet, .stat {
   margin: 0.5rem 0;
   font-size: 1.1rem;
+  color: #444;
 }
+
+/* Nilai HP dan Kills */
+.value {
+  font-weight: bold;
+  color: #222;
+}
+
+/* Status serangan */
+.attacking {
+  margin-top: 1rem;
+  color: #d63031;
+  font-weight: bold;
+}
+
+/* Tombol utama (Attack dan Connect) */
 .attack-button, .connect-button {
   padding: 1rem 2rem;
   font-size: 1.2rem;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   background-color: #ff4757;
   color: white;
   border: none;
@@ -27,6 +49,12 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
 .attack-button:hover, .connect-button:hover {
   background-color: #e84118;
+}
+
+.attack-button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
 }

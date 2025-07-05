@@ -1,83 +1,88 @@
 import { useEffect, useState } from "react";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { ethers } from "ethers";
 
 const CONTRACT_ADDRESS = "0x7eb0e397fb22958d80d44725f9dc1d2ffd1aac26";
+const SOMNIA_CHAIN_ID = 50312;
+const SOMNIA_RPC = "https://dream-rpc.somnia.network/";
+
 const ABI = [
-  {
-    "inputs": [],
-    "name": "attack",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "player", "type": "address" }
-    ],
-    "name": "getStatus",
-    "outputs": [
-      { "internalType": "uint256", "name": "hp", "type": "uint256" },
-      { "internalType": "uint256", "name": "kills", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
+  "function attack() public",
+  "function getStatus(address) public view returns (uint hp, uint kills)",
+  "event Attacked(address indexed hero, uint damage)",
+  "event MonsterDefeated(address indexed hero)"
 ];
 
-function App() {
-  const [wallet, setWallet] = useState("");
-  const [status, setStatus] = useState({ hp: 0, kills: 0 });
-  const [provider, setProvider] = useState(null);
-  const [contract, setContract] = useState(null);
+export default function App() {
+  const { ready, authenticated, login, logout } = usePrivy();
+  const { wallets } = useWallets();
+  const wallet = wallets[0];
 
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      setWallet(accounts[0]);
-      const _provider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(_provider);
-      const signer = await _provider.getSigner();
-      const _contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-      setContract(_contract);
-    } else {
-      alert("Wallet not found. Please install MetaMask or OKX Wallet.");
-    }
-  };
-
-  const attack = async () => {
-    if (!contract) return;
-    const tx = await contract.attack();
-    await tx.wait();
-    getStatus(); // refresh status after attack
-  };
-
-  const getStatus = async () => {
-    if (!contract || !wallet) return;
-    const data = await contract.getStatus(wallet);
-    setStatus({ hp: Number(data.hp), kills: Number(data.kills) });
-  };
+  const [address, setAddress] = useState("");
+  const [hp, setHp] = useState(0);
+  const [kills, setKills] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (wallet && contract) {
-      getStatus();
+    const fetchStatus = async () => {
+      if (!wallet) return;
+      const provider = new ethers.JsonRpcProvider(SOMNIA_RPC);
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+      const [userHp, userKills] = await contract.getStatus(wallet.address);
+      setAddress(wallet.address);
+      setHp(Number(userHp));
+      setKills(Number(userKills));
+    };
+    fetchStatus();
+  }, [wallet]);
+
+  const handleAttack = async () => {
+    if (!wallet) return alert("Please connect your wallet first.");
+    setLoading(true);
+    try {
+      const injected = new ethers.BrowserProvider(window.ethereum);
+      const network = await injected.getNetwork();
+      if (network.chainId !== BigInt(SOMNIA_CHAIN_ID)) {
+        alert("Please switch your wallet to Somnia Testnet (Chain ID 50312).");
+        setLoading(false);
+        return;
+      }
+
+      const signer = await injected.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      const tx = await contract.attack();
+      await tx.wait();
+
+      const [userHp, userKills] = await contract.getStatus(wallet.address);
+      setHp(Number(userHp));
+      setKills(Number(userKills));
+      alert("Attack successful!");
+    } catch (err) {
+      console.error(err);
+      alert("Attack failed.");
     }
-  }, [wallet, contract]);
+    setLoading(false);
+  };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "monospace" }}>
+    <div style={{ fontFamily: "monospace", padding: "20px", textAlign: "center" }}>
       <h1>⚔️ Hero vs Monster</h1>
-      {wallet ? (
-        <>
-          <p>🦊 Wallet: {wallet}</p>
-          <p>❤️ HP: {status.hp}</p>
-          <p>💀 Kills: {status.kills}</p>
-          <button onClick={attack}>Attack</button>
-        </>
+      {!authenticated ? (
+        <button onClick={login}>Login with Privy</button>
       ) : (
-        <button onClick={connectWallet}>Connect Wallet</button>
+        <div>
+          <p>🦊 Wallet: {address}</p>
+          <p>❤️ HP: {hp}</p>
+          <p>💀 Kills: {kills}</p>
+          <button onClick={handleAttack} disabled={loading}>
+            {loading ? "Attacking..." : "Attack"}
+          </button>
+          <br />
+          <button onClick={logout} style={{ marginTop: "10px" }}>
+            Log Out
+          </button>
+        </div>
       )}
     </div>
   );
 }
-
-export default App;

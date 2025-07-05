@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^0.13.1",
+    "@privy-io/react-auth": "^0.12.1",
     "ethers": "^6.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

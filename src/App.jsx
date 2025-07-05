@@ -17,28 +17,31 @@ export default function App() {
 
   const connectWallet = async () => {
     if (!window.ethereum) {
-      alert("MetaMask tidak ditemukan!");
+      alert("MetaMask atau wallet tidak ditemukan!");
       return;
     }
 
-    try {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+    const web3Provider = new ethers.BrowserProvider(window.ethereum, "any");
 
-      // Switch ke jaringan Somnia (chainId = 50312 = 0xc4808)
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const address = accounts[0];
+      setWallet(address);
+
+      // Switch ke jaringan Somnia
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xc4f8" }],
+          params: [{ chainId: "0xc4f8" }], // ✅ Benar: 50312
         });
       } catch (switchError) {
         if (switchError.code === 4902) {
+          // Tambah jaringan Somnia jika belum ada
           await window.ethereum.request({
             method: "wallet_addEthereumChain",
             params: [
               {
-                chainId: "0xc4808",
+                chainId: "0xc4f8",
                 chainName: "Somnia Testnet",
                 nativeCurrency: {
                   name: "Somnia Testnet Token",
@@ -46,9 +49,7 @@ export default function App() {
                   decimals: 18,
                 },
                 rpcUrls: ["https://dream-rpc.somnia.network/"],
-                blockExplorerUrls: [
-                  "https://shannon-explorer.somnia.network/",
-                ],
+                blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
               },
             ],
           });
@@ -57,9 +58,7 @@ export default function App() {
         }
       }
 
-      const web3Provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await web3Provider.getSigner();
-      const address = await signer.getAddress();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
       setProvider(web3Provider);
@@ -119,7 +118,7 @@ export default function App() {
               color: "#fff",
               border: "none",
               borderRadius: "8px",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             Attack

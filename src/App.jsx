@@ -1,121 +1,77 @@
 import { useEffect, useState } from "react";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { ethers } from "ethers";
+import abi from "./abi/HeroMonsterBattle.json";
 
 const CONTRACT_ADDRESS = "0x7eb0e397fb22958d80d44725f9dc1d2ffd1aac26";
-const ABI = [
-  {
-    inputs: [],
-    name: "attack",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: "address", name: "player", type: "address" },
-      { indexed: false, internalType: "uint256", name: "damage", type: "uint256" },
-      { indexed: false, internalType: "uint256", name: "remainingHP", type: "uint256" },
-    ],
-    name: "Attacked",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: "address", name: "player", type: "address" }
-    ],
-    name: "MonsterDefeated",
-    type: "event",
-  },
-  {
-    inputs: [{ internalType: "address", name: "player", type: "address" }],
-    name: "getStatus",
-    outputs: [
-      { internalType: "uint256", name: "hp", type: "uint256" },
-      { internalType: "uint256", name: "kills", type: "uint256" }
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
 
-function App() {
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [contract, setContract] = useState(null);
-  const [address, setAddress] = useState("");
-  const [hp, setHp] = useState(0);
-  const [kills, setKills] = useState(0);
-  const [log, setLog] = useState([]);
+export default function App() {
+  const { ready, authenticated, login, logout } = usePrivy();
+  const { wallets } = useWallets();
+  const wallet = wallets[0];
+  const [hp, setHP] = useState(null);
+  const [kills, setKills] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const getStatus = async () => {
+    if (!wallet?.address) return;
+    const provider = new ethers.BrowserProvider(wallet);
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+    const [hp, kills] = await contract.getStatus(wallet.address);
+    setHP(hp.toString());
+    setKills(kills.toString());
+  };
+
+  const attack = async () => {
+    if (!wallet) return;
+    setLoading(true);
+    try {
+      const provider = new ethers.BrowserProvider(wallet);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+      const tx = await contract.attack();
+      await tx.wait();
+      await getStatus();
+    } catch (err) {
+      console.error("Attack failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (window.ethereum) {
-      const newProvider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(newProvider);
+    if (authenticated) {
+      getStatus();
     }
-  }, []);
-
-  const connectWallet = async () => {
-    if (!provider) return alert("Wallet tidak ditemukan!");
-    const accounts = await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-    const addr = await signer.getAddress();
-
-    setSigner(signer);
-    setContract(contract);
-    setAddress(addr);
-    updateStatus(contract, addr);
-    listenEvents(contract);
-  };
-
-  const updateStatus = async (contract, addr) => {
-    const status = await contract.getStatus(addr);
-    setHp(Number(status.hp));
-    setKills(Number(status.kills));
-  };
-
-  const listenEvents = (contract) => {
-    contract.on("Attacked", (player, damage, remainingHP) => {
-      if (player.toLowerCase() !== address.toLowerCase()) return;
-      setLog((prev) => [`🗡️ Damage: ${damage}, 🩸 HP: ${remainingHP}`, ...prev]);
-      setHp(Number(remainingHP));
-    });
-
-    contract.on("MonsterDefeated", (player) => {
-      if (player.toLowerCase() !== address.toLowerCase()) return;
-      setLog((prev) => [`🎉 Monster defeated!`, ...prev]);
-      setKills((prev) => prev + 1);
-    });
-  };
-
-  const handleAttack = async () => {
-    if (!contract) return;
-    const tx = await contract.attack();
-    await tx.wait();
-  };
+  }, [authenticated]);
 
   return (
-    <main style={{ padding: 20, fontFamily: "sans-serif" }}>
-      <h1>🧙 Hero vs Monster 🐲</h1>
-      {!address ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
+    <main className="p-6">
+      <h1 className="text-2xl font-bold mb-4">⚔️ Hero vs Monster</h1>
+      {!ready ? (
+        <p>Loading Privy...</p>
+      ) : authenticated ? (
+        <div>
+          <p><strong>Wallet:</strong> {wallet?.address}</p>
+          <p><strong>HP:</strong> {hp}</p>
+          <p><strong>Kills:</strong> {kills}</p>
+          <button
+            onClick={attack}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            disabled={loading}
+          >
+            {loading ? "Attacking..." : "Attack!"}
+          </button>
+          <button onClick={logout} className="mt-4 ml-4 text-sm text-gray-500 underline">Log Out</button>
+        </div>
       ) : (
-        <>
-          <p>Wallet: {address}</p>
-          <p>❤️ HP: {hp}</p>
-          <p>💀 Kills: {kills}</p>
-          <button onClick={handleAttack}>⚔️ Attack!</button>
-          <ul>
-            {log.map((entry, i) => (
-              <li key={i}>{entry}</li>
-            ))}
-          </ul>
-        </>
+        <button
+          onClick={login}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Connect Wallet
+        </button>
       )}
     </main>
   );
 }
-
-export default App;

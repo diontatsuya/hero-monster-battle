@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { ToastContainer, toast } from "react-toastify";
+import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
@@ -12,8 +13,6 @@ const ABI = [
 
 export default function App() {
   const [wallet, setWallet] = useState(null);
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [hp, setHp] = useState(null);
   const [kills, setKills] = useState(null);
@@ -24,14 +23,11 @@ export default function App() {
       alert("MetaMask atau wallet tidak ditemukan!");
       return;
     }
-
-    const web3Provider = new ethers.BrowserProvider(window.ethereum, "any");
-
+    const provider = new ethers.BrowserProvider(window.ethereum, "any");
     try {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const address = accounts[0];
       setWallet(address);
-
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
@@ -45,11 +41,7 @@ export default function App() {
               {
                 chainId: "0xc488",
                 chainName: "Somnia Testnet",
-                nativeCurrency: {
-                  name: "Somnia Testnet Token",
-                  symbol: "STT",
-                  decimals: 18,
-                },
+                nativeCurrency: { name: "Somnia", symbol: "STT", decimals: 18 },
                 rpcUrls: ["https://dream-rpc.somnia.network/"],
                 blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
               },
@@ -59,14 +51,9 @@ export default function App() {
           throw switchError;
         }
       }
-
-      const signer = await web3Provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-
-      setProvider(web3Provider);
-      setSigner(signer);
-      setContract(contract);
-      setWallet(address);
+      const signer = await provider.getSigner();
+      const instance = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      setContract(instance);
     } catch (err) {
       console.error("Gagal connect wallet:", err);
     }
@@ -90,7 +77,7 @@ export default function App() {
       const tx = await contract.attack();
       await tx.wait();
       await fetchStatus();
-      toast.success("🎉 Serangan berhasil!");
+      toast.success("🎯 Serangan berhasil!");
     } catch (err) {
       toast.error("❌ Gagal menyerang");
       console.error("Gagal menyerang:", err);
@@ -115,25 +102,19 @@ export default function App() {
       {wallet ? (
         <>
           <p className="wallet">🦊 Wallet: {wallet}</p>
-          <p className="stat">
-            ❤️ HP: <span className="value">{hp !== null ? hp : "Loading..."}</span>
-          </p>
-          <p className="stat">
-            💀 Kills: <span className="value">{kills !== null ? kills : "Loading..."}</span>
-          </p>
-          {isAttacking && <p className="attacking">⚔️ Attacking monster...</p>}
-          <button
+          <div className="stat">❤️ HP: <progress value={hp} max="100"></progress> {hp}</div>
+          <div className="stat">💀 Kills: {kills}</div>
+          <motion.button
             className="attack-button"
             onClick={handleAttack}
+            whileTap={{ scale: 0.95 }}
             disabled={isAttacking}
           >
             {isAttacking ? "Attacking..." : "Attack"}
-          </button>
+          </motion.button>
         </>
       ) : (
-        <button className="connect-button" onClick={connectWallet}>
-          Connect Wallet
-        </button>
+        <button className="connect-button" onClick={connectWallet}>Connect Wallet</button>
       )}
       <ToastContainer position="top-center" />
     </div>

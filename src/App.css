@@ -1,60 +1,80 @@
-/* Container utama */
-.container {
-  max-width: 600px;
-  margin: 2rem auto;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #121212;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.game-container {
+  max-width: 500px;
+  margin: 0 auto;
   padding: 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #fefefe;
-  border-radius: 16px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
-/* Judul utama */
 .title {
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: #333;
 }
 
-/* Alamat wallet dan status */
-.wallet, .stat {
-  margin: 0.5rem 0;
-  font-size: 1.1rem;
-  color: #444;
+.wallet {
+  font-size: 0.9rem;
+  color: #ccc;
+  word-break: break-all;
 }
 
-/* Nilai HP dan Kills */
-.value {
-  font-weight: bold;
-  color: #222;
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1rem 0;
 }
 
-/* Status serangan */
-.attacking {
-  margin-top: 1rem;
-  color: #d63031;
-  font-weight: bold;
+progress {
+  width: 70%;
+  height: 20px;
+  border-radius: 10px;
+  appearance: none;
 }
 
-/* Tombol utama (Attack dan Connect) */
-.attack-button, .connect-button {
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  margin-top: 1.5rem;
-  background-color: #ff4757;
+progress::-webkit-progress-bar {
+  background-color: #444;
+  border-radius: 10px;
+}
+
+progress::-webkit-progress-value {
+  background-color: #00ff6e;
+  border-radius: 10px;
+}
+
+.attack-button,
+.connect-button {
+  padding: 0.75rem 2rem;
+  background: #ff3c3c;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  margin-top: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background 0.2s;
 }
 
-.attack-button:hover, .connect-button:hover {
-  background-color: #e84118;
+.attack-button:hover,
+.connect-button:hover {
+  background: #ff6060;
 }
 
-.attack-button:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
+.monster {
+  width: 100px;
+  height: 100px;
+  margin: 1rem auto;
+  background-image: url('/monster.png');
+  background-size: cover;
+  transition: transform 0.3s;
+}
+
+.monster.hit {
+  transform: scale(1.2) rotate(10deg);
 }

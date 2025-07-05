@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
 
 const CONTRACT_ADDRESS = "0x7eb0e397fb22958d80d44725f9dc1d2ffd1aac26";
 const ABI = [
@@ -14,6 +17,7 @@ export default function App() {
   const [contract, setContract] = useState(null);
   const [hp, setHp] = useState(null);
   const [kills, setKills] = useState(null);
+  const [isAttacking, setIsAttacking] = useState(false);
 
   const connectWallet = async () => {
     if (!window.ethereum) {
@@ -28,15 +32,13 @@ export default function App() {
       const address = accounts[0];
       setWallet(address);
 
-      // Switch ke jaringan Somnia
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xc488" }], // ✅ Benar: 50312
+          params: [{ chainId: "0xc488" }],
         });
       } catch (switchError) {
         if (switchError.code === 4902) {
-          // Tambah jaringan Somnia jika belum ada
           await window.ethereum.request({
             method: "wallet_addEthereumChain",
             params: [
@@ -84,11 +86,16 @@ export default function App() {
   const handleAttack = async () => {
     if (!contract) return;
     try {
+      setIsAttacking(true);
       const tx = await contract.attack();
       await tx.wait();
-      fetchStatus();
+      await fetchStatus();
+      toast.success("🎉 Serangan berhasil!");
     } catch (err) {
+      toast.error("❌ Gagal menyerang");
       console.error("Gagal menyerang:", err);
+    } finally {
+      setIsAttacking(false);
     }
   };
 
@@ -103,30 +110,32 @@ export default function App() {
   }, [contract, wallet]);
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif", maxWidth: "600px", margin: "auto" }}>
-      <h1>⚔️ Hero vs Monster</h1>
+    <div className="container">
+      <h1 className="title">⚔️ Hero vs Monster</h1>
       {wallet ? (
         <>
-          <p>🦊 Wallet: {wallet}</p>
-          <p>❤️ HP: {hp !== null ? hp : "Loading..."}</p>
-          <p>💀 Kills: {kills !== null ? kills : "Loading..."}</p>
+          <p className="wallet">🦊 Wallet: {wallet}</p>
+          <p className="stat">
+            ❤️ HP: <span className="value">{hp !== null ? hp : "Loading..."}</span>
+          </p>
+          <p className="stat">
+            💀 Kills: <span className="value">{kills !== null ? kills : "Loading..."}</span>
+          </p>
+          {isAttacking && <p className="attacking">⚔️ Attacking monster...</p>}
           <button
+            className="attack-button"
             onClick={handleAttack}
-            style={{
-              padding: "1rem 2rem",
-              backgroundColor: "#333",
-              color: "#fff",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-            }}
+            disabled={isAttacking}
           >
-            Attack
+            {isAttacking ? "Attacking..." : "Attack"}
           </button>
         </>
       ) : (
-        <button onClick={connectWallet}>Connect Wallet</button>
+        <button className="connect-button" onClick={connectWallet}>
+          Connect Wallet
+        </button>
       )}
+      <ToastContainer position="top-center" />
     </div>
   );
 }

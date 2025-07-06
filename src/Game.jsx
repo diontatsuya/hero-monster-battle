@@ -49,13 +49,13 @@ const Game = () => {
   return (
     <div className="text-center">
       <h1 className="text-4xl font-bold mb-6">⚔️ Hero vs Monster</h1>
-      <div className="flex justify-center items-center gap-10 mb-6">
+      <div className="flex justify-center items-center gap-10 mb-6 flex-wrap">
         <HeroCard hp={heroHP} />
         <MonsterCard hp={monsterHP} />
       </div>
       <button
         onClick={attack}
-        className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg text-white font-semibold shadow-md"
+        className="bg-blue-600 hover:bg-blue-700 px-6 py-2 mt-4 rounded-xl text-white font-semibold shadow-md active:scale-95 transition-transform duration-150"
       >
         Attack!
       </button>

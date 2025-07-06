@@ -6,7 +6,7 @@ const HeroCard = ({ hp }) => (
     <img
       src={hero}
       alt="Hero"
-      className="mx-auto max-w-[100px] sm:max-w-[160px] h-auto animate-pulse"
+      className="mx-auto max-w-[100px] sm:max-w-[160px] h-auto animate-wiggle"
     />
     <p className="mt-2 text-lg">Hero HP: {hp}</p>
   </div>

@@ -2,14 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Body Styling with background arena */
 body {
   font-family: 'Segoe UI', sans-serif;
-  background-image: url('/arena.jpg');
+  background-image: url('/arena.jpg?v=3'); /* ✅ versi cache buster */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: white;
+  min-height: 100vh;
+  margin: 0;
 }
 
 /* Hero glowing idle animation */

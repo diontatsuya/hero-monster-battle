@@ -1,20 +1,22 @@
 import React from "react";
-import heroImg from "../assets/hero.png";
-import monsterImg from "../assets/monster.png";
+import "./Arena.css";
 
-export default function Arena({ isAttacking }) {
+export default function Arena({ hero, monster, isAttacking }) {
   return (
     <div className="arena">
-      <img
-        src={heroImg}
-        alt="Hero"
-        className={`hero ${isAttacking ? "shake" : ""}`}
-      />
-      <img
-        src={monsterImg}
-        alt="Monster"
-        className={`monster ${isAttacking ? "shake" : ""}`}
-      />
+      <div className={`hero ${isAttacking ? "hero-attack" : ""}`}>
+        <img src={hero.image} alt="Hero" />
+        <div className="hp-bar">
+          <div className="hp" style={{ width: `${hero.hp}%` }}></div>
+        </div>
+      </div>
+
+      <div className={`monster ${isAttacking ? "monster-hit" : ""}`}>
+        <img src={monster.image} alt="Monster" />
+        <div className="hp-bar">
+          <div className="hp" style={{ width: `${monster.hp}%` }}></div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -5,17 +5,33 @@
 body {
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(to right, #1f2937, #111827);
+  color: white;
 }
 
-@keyframes wiggle {
+/* Hero Animasi: glow + idle */
+@keyframes hero-glow {
   0%, 100% {
-    transform: rotate(-1.5deg);
+    transform: rotate(-1deg) scale(1);
+    filter: brightness(1);
   }
   50% {
-    transform: rotate(1.5deg);
+    transform: rotate(1deg) scale(1.03);
+    filter: brightness(1.2);
   }
 }
+.animate-hero-glow {
+  animation: hero-glow 1.6s ease-in-out infinite;
+}
 
-.animate-wiggle {
-  animation: wiggle 1s ease-in-out infinite;
+/* Monster Animasi: bounce idle */
+@keyframes monster-bounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.03);
+  }
+}
+.animate-monster-bounce {
+  animation: monster-bounce 1.8s ease-in-out infinite;
 }

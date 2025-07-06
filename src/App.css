@@ -1,87 +1,51 @@
 body {
   margin: 0;
-  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  padding: 0;
+  background-color: #101010;
   color: #fff;
   font-family: "Arial", sans-serif;
 }
 
 .container {
-  max-width: 600px;
-  margin: auto;
-  padding: 2rem;
   text-align: center;
+  padding: 2rem;
 }
 
 .title {
   font-size: 2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.wallet {
-  font-size: 1rem;
-  word-break: break-all;
-}
-
+.wallet,
 .stat {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   margin: 0.5rem 0;
 }
 
 .value {
   font-weight: bold;
-  color: #00ffcc;
+  color: #ffd700;
 }
 
-.attack-button,
-.connect-button {
+.connect-button,
+.attack-button {
   padding: 1rem 2rem;
-  font-size: 1rem;
-  margin-top: 1rem;
-  background-color: #00ffcc;
-  color: #000;
+  font-size: 1.1rem;
+  background-color: #1e90ff;
+  color: #fff;
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.attack-button:hover,
-.connect-button:hover {
-  background-color: #00ccaa;
-  transform: scale(1.05);
-}
-
-.attacking {
-  color: #ffcc00;
-  font-weight: bold;
   margin-top: 1rem;
 }
 
-.arena {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin: 2rem 0;
-  flex-wrap: wrap;
+.connect-button:hover,
+.attack-button:hover {
+  background-color: #4682b4;
 }
 
-.hero,
-.monster {
-  width: 200px;
-  height: 200px;
-  object-fit: contain;
-  transition: transform 0.2s ease;
-}
-
-.shake {
-  animation: shake 0.4s;
-}
-
-@keyframes shake {
-  0% { transform: translate(1px, 1px) rotate(0deg); }
-  20% { transform: translate(-3px, 0px) rotate(-1deg); }
-  40% { transform: translate(3px, 2px) rotate(1deg); }
-  60% { transform: translate(1px, -2px) rotate(0deg); }
-  80% { transform: translate(-1px, 1px) rotate(1deg); }
-  100% { transform: translate(1px, -1px) rotate(-1deg); }
+.attacking {
+  color: #ffa500;
+  font-weight: bold;
+  margin-top: 1rem;
 }

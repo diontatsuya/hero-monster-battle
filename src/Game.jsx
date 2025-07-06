@@ -31,12 +31,19 @@ const Game = () => {
   const attack = async () => {
     if (!contract || !account) return;
     try {
+      const monsterEl = document.getElementById("monster");
+      monsterEl?.classList.add("shake");
+
       const tx = await contract.attack();
       await tx.wait();
       const status = await contract.getStatus(account);
       setHeroHP(Number(status.heroHP));
       setMonsterHP(Number(status.monsterHP));
       setLog((prev) => [`Hero attacked!`, ...prev]);
+
+      setTimeout(() => {
+        monsterEl?.classList.remove("shake");
+      }, 400);
     } catch (err) {
       console.error(err);
     }
@@ -53,12 +60,18 @@ const Game = () => {
         <HeroCard hp={heroHP} />
         <MonsterCard hp={monsterHP} />
       </div>
-      <button
-        onClick={attack}
-        className="bg-blue-600 hover:bg-blue-700 px-6 py-2 mt-4 rounded-xl text-white font-semibold shadow-md active:scale-95 transition-transform duration-150"
-      >
-        Attack!
-      </button>
+      {heroHP > 0 && monsterHP > 0 ? (
+        <button
+          onClick={attack}
+          className="bg-blue-600 hover:bg-blue-700 px-6 py-2 mt-4 rounded-xl text-white font-semibold shadow-md active:scale-95 transition-transform duration-150"
+        >
+          Attack!
+        </button>
+      ) : (
+        <p className="text-xl mt-4 font-bold text-yellow-400">
+          {heroHP === 0 ? '💀 Game Over!' : '🏆 Victory!'}
+        </p>
+      )}
       <BattleLog logs={log} />
     </div>
   );

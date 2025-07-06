@@ -1,6 +1,6 @@
+import './styles/global.css'; // ✅ pastikan ini ada
 import React from 'react';
 import Game from './Game';
-import './styles/global.css'; // ✅ pastikan ini ada
 
 const App = () => {
   return (
